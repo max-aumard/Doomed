@@ -10,18 +10,18 @@ jobs:
     name: Filter tests (JS)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
-      - run: node --test tests/
+      - run: node --test tests/*.test.js
 
   build:
     name: Build iOS app
     runs-on: macos-15
     needs: filter-tests
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install XcodeGen
         run: brew install xcodegen
@@ -58,7 +58,7 @@ jobs:
           cp -R build/device/Build/Products/Release-iphoneos/Doomed.app Payload/
           zip -qr Doomed-unsigned.ipa Payload
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: Doomed-unsigned-ipa
           path: Doomed-unsigned.ipa

@@ -48,7 +48,7 @@ Tout se compile sur GitHub Actions (runner macOS), pas besoin de Mac.
 3. Tests du filtre en local (Windows/Linux/Mac) :
 
    ```bash
-   node --test tests/
+   node --test tests/*.test.js
    ```
 
 Pour mettre à jour les règles quand Instagram ou YouTube change son site : modifier `filter.js`, ajouter un cas dans `tests/filter.test.js`, puis pousser.
