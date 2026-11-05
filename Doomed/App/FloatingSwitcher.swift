@@ -19,8 +19,9 @@ struct FloatingSwitcher: View {
 
     var body: some View {
         GeometryReader { geo in
-            let width = expanded ? item + 8 : bubble
-            let height = expanded ? CGFloat(Site.allCases.count + 1) * item + 8 : bubble
+            let menuRows = CGFloat(Site.allCases.count) + 1
+            let width: CGFloat = expanded ? item + 8 : bubble
+            let height: CGFloat = expanded ? menuRows * item + 8 : bubble
             let x = onRight ? geo.size.width - width / 2 - margin : width / 2 + margin
             let rawY = bubbleY * geo.size.height
             let y = min(max(rawY, height / 2 + 8), geo.size.height - height / 2 - 8)
