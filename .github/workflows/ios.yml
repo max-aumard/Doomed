@@ -1,0 +1,65 @@
+name: iOS
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  filter-tests:
+    name: Filter tests (JS)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test tests/
+
+  build:
+    name: Build iOS app
+    runs-on: macos-15
+    needs: filter-tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build for simulator
+        run: |
+          xcodebuild \
+            -project Doomed.xcodeproj \
+            -scheme Doomed \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build/sim \
+            CODE_SIGNING_ALLOWED=NO \
+            -quiet build
+
+      - name: Build unsigned device app
+        run: |
+          xcodebuild \
+            -project Doomed.xcodeproj \
+            -scheme Doomed \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/device \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            -quiet build
+
+      - name: Package unsigned IPA
+        run: |
+          mkdir -p Payload
+          cp -R build/device/Build/Products/Release-iphoneos/Doomed.app Payload/
+          zip -qr Doomed-unsigned.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Doomed-unsigned-ipa
+          path: Doomed-unsigned.ipa
+          retention-days: 30

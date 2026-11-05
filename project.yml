@@ -1,0 +1,47 @@
+# XcodeGen spec — the .xcodeproj is generated (on CI or a Mac) with:
+#   xcodegen generate
+name: Doomed
+
+options:
+  bundleIdPrefix: org.doomed
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    DEVELOPMENT_TEAM: ""
+
+targets:
+  Doomed:
+    type: application
+    platform: iOS
+    sources:
+      - path: Doomed
+        excludes:
+          - "Web/*.js"
+      - path: Doomed/Web/filter.js
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.doomed.app
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_PREVIEWS: YES
+    info:
+      path: Doomed/Info.plist
+      properties:
+        CFBundleDisplayName: Doomed
+        LSRequiresIPhoneOS: true
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        ITSAppUsesNonExemptEncryption: false
+    entitlements:
+      path: Doomed/Doomed.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+    scheme: {}
