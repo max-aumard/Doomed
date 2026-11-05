@@ -114,3 +114,14 @@ test('adblock.json is a valid WebKit rule list', () => {
   assert.ok(!matches('https://www.instagram.com/direct/inbox/'));
   assert.ok(!matches('https://scontent.cdninstagram.com/v/t51.jpg'));
 });
+
+const { parseRgb } = require('../Doomed/Web/filter.js');
+
+test('status bar color parsing', () => {
+  assert.deepEqual(parseRgb('rgb(12, 16, 20)'), [12, 16, 20]);
+  assert.deepEqual(parseRgb('rgba(255, 255, 255, 1)'), [255, 255, 255]);
+  assert.deepEqual(parseRgb('rgb(0 0 0 / 90%)'), [0, 0, 0]);
+  assert.equal(parseRgb('rgba(0, 0, 0, 0)'), null);
+  assert.equal(parseRgb('transparent'), null);
+  assert.equal(parseRgb(''), null);
+});

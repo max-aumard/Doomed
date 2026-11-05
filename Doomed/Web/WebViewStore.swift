@@ -60,6 +60,7 @@ final class WebViewStore: NSObject, ObservableObject {
         webView.scrollView.refreshControl = refresh
 
         installScripts()
+        config.userContentController.add(WeakMessageHandler(self), name: "doomedColor")
 
         colorObservers = [
             webView.observe(\.themeColor, options: [.new]) { [weak self] _, _ in
@@ -71,8 +72,11 @@ final class WebViewStore: NSObject, ObservableObject {
         ]
     }
 
+    /// Color reported by filter.js (background actually drawn at the top of the page).
+    private var pageColor: UIColor?
+
     private func updateTopColor() {
-        let color: UIColor? = webView.themeColor ?? webView.underPageBackgroundColor
+        let color: UIColor? = pageColor ?? webView.themeColor ?? webView.underPageBackgroundColor
         topColor = color ?? .systemBackground
     }
 
@@ -122,6 +126,37 @@ final class WebViewStore: NSObject, ObservableObject {
     @objc private func pullToRefresh(_ sender: UIRefreshControl) {
         webView.reload()
         sender.endRefreshing()
+    }
+}
+
+extension WebViewStore: WKScriptMessageHandler {
+    /// `doomedColor`: [r, g, b] of the page top, posted by filter.js.
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        guard
+            message.name == "doomedColor",
+            message.frameInfo.isMainFrame,
+            let rgb = message.body as? [NSNumber], rgb.count == 3
+        else { return }
+        pageColor = UIColor(
+            red: CGFloat(rgb[0].doubleValue) / 255,
+            green: CGFloat(rgb[1].doubleValue) / 255,
+            blue: CGFloat(rgb[2].doubleValue) / 255,
+            alpha: 1
+        )
+        updateTopColor()
+    }
+}
+
+/// WKUserContentController retains its handlers; this avoids a retain cycle.
+private final class WeakMessageHandler: NSObject, WKScriptMessageHandler {
+    private weak var target: WKScriptMessageHandler?
+
+    init(_ target: WKScriptMessageHandler) {
+        self.target = target
+    }
+
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        target?.userContentController(userContentController, didReceive: message)
     }
 }
 

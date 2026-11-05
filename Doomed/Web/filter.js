@@ -273,6 +273,44 @@
     meta.setAttribute('content', content + ', maximum-scale=1, user-scalable=no');
   }
 
+  /** "rgb(12, 16, 20)" / "rgba(12, 16, 20, 1)" -> [12, 16, 20], null if transparent. */
+  function parseRgb(css) {
+    var m = String(css || '').match(/rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)(?:[,\s/]+([\d.]+%?))?\s*\)/);
+    if (!m) return null;
+    if (m[4] !== undefined) {
+      var alpha = m[4].slice(-1) === '%' ? parseFloat(m[4]) / 100 : parseFloat(m[4]);
+      if (alpha < 0.5) return null;
+    }
+    return [Number(m[1]), Number(m[2]), Number(m[3])];
+  }
+
+  /** Background color of whatever is drawn at the very top of the page. */
+  function topBackgroundColor(win, doc) {
+    var el = doc.elementFromPoint ? doc.elementFromPoint(win.innerWidth / 2, 1) : null;
+    while (el && el.nodeType === 1) {
+      var rgb = parseRgb(win.getComputedStyle(el).backgroundColor);
+      if (rgb) return rgb;
+      el = el.parentElement;
+    }
+    var fallback = doc.body && parseRgb(win.getComputedStyle(doc.body).backgroundColor);
+    return fallback || parseRgb(win.getComputedStyle(doc.documentElement).backgroundColor);
+  }
+
+  /** Tells the app which color to paint behind the status bar. */
+  function makeColorReporter(win, doc) {
+    var last = '';
+    return function () {
+      var handler = win.webkit && win.webkit.messageHandlers && win.webkit.messageHandlers.doomedColor;
+      if (!handler || !doc.body) return;
+      var rgb = topBackgroundColor(win, doc);
+      if (!rgb) return;
+      var key = rgb.join(',');
+      if (key === last) return;
+      last = key;
+      handler.postMessage(rgb);
+    };
+  }
+
   function install(win, rawCfg) {
     var cfg = withDefaults(rawCfg);
     var doc = win.document;
@@ -324,10 +362,13 @@
     });
     win.addEventListener('popstate', enforce);
 
+    var reportColor = makeColorReporter(win, doc);
+
     function tick() {
       enforce();
       ensureStyle();
       ensureViewport(doc);
+      try { reportColor(); } catch (e) { /* ignore */ }
       if (cfg.blockAds) {
         if (site === 'youtube') skipVideoAds(doc);
         if (site === 'instagram') hideInstagramSponsored(doc);
@@ -347,6 +388,7 @@
     cssFor: cssFor,
     pruneAds: pruneAds,
     isSponsoredLabel: isSponsoredLabel,
+    parseRgb: parseRgb,
     DEFAULTS: DEFAULTS
   };
 
