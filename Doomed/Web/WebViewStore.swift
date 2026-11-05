@@ -15,9 +15,13 @@ final class WebViewStore: NSObject, ObservableObject {
     let site: Site
     let webView: WKWebView
 
+    /// Page color used to paint the status bar strip above the web view.
+    @Published private(set) var topColor: UIColor = .systemBackground
+
     private var settings: FilterSettings
     private var adRules: WKContentRuleList?
     private var started = false
+    private var colorObservers: [NSKeyValueObservation] = []
 
     private static let filterSource: String = {
         guard
@@ -56,6 +60,20 @@ final class WebViewStore: NSObject, ObservableObject {
         webView.scrollView.refreshControl = refresh
 
         installScripts()
+
+        colorObservers = [
+            webView.observe(\.themeColor, options: [.new]) { [weak self] _, _ in
+                DispatchQueue.main.async { self?.updateTopColor() }
+            },
+            webView.observe(\.underPageBackgroundColor, options: [.new]) { [weak self] _, _ in
+                DispatchQueue.main.async { self?.updateTopColor() }
+            },
+        ]
+    }
+
+    private func updateTopColor() {
+        let color: UIColor? = webView.themeColor ?? webView.underPageBackgroundColor
+        topColor = color ?? .systemBackground
     }
 
     /// Called once the ad-block rule list is compiled (or failed to compile).

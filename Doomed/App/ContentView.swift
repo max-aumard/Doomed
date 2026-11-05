@@ -13,8 +13,7 @@ struct ContentView: View {
             Color(uiColor: .systemBackground).ignoresSafeArea()
 
             ForEach(Site.allCases) { site in
-                WebView(webView: model.store(for: site).webView)
-                    .ignoresSafeArea()
+                SitePage(store: model.store(for: site))
                     .opacity(site == current ? 1 : 0)
                     .allowsHitTesting(site == current)
                     .accessibilityHidden(site != current)
@@ -38,5 +37,17 @@ struct ContentView: View {
         } else {
             currentRaw = site.rawValue
         }
+    }
+}
+
+/// The web view stays below the status bar (sites' fixed headers would
+/// otherwise sit under the clock); the strip above is painted with the page color.
+private struct SitePage: View {
+    @ObservedObject var store: WebViewStore
+
+    var body: some View {
+        WebView(webView: store.webView)
+            .ignoresSafeArea(.container, edges: .bottom)
+            .background(Color(uiColor: store.topColor).ignoresSafeArea())
     }
 }
