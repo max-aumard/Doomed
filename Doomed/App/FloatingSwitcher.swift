@@ -19,12 +19,9 @@ struct FloatingSwitcher: View {
 
     var body: some View {
         GeometryReader { geo in
-            let menuRows = CGFloat(Site.allCases.count) + 1
-            let width: CGFloat = expanded ? item + 8 : bubble
-            let height: CGFloat = expanded ? menuRows * item + 8 : bubble
-            let x = onRight ? geo.size.width - width / 2 - margin : width / 2 + margin
-            let rawY = bubbleY * geo.size.height
-            let y = min(max(rawY, height / 2 + 8), geo.size.height - height / 2 - 8)
+            let center = anchor(in: geo.size)
+            let x = center.x
+            let y = center.y
 
             ZStack {
                 if expanded {
@@ -54,6 +51,19 @@ struct FloatingSwitcher: View {
         }
         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: expanded)
         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: onRight)
+    }
+
+    /// Center of the bubble (or of the open menu), kept inside the screen.
+    private func anchor(in size: CGSize) -> CGPoint {
+        let rows = CGFloat(Site.allCases.count + 1)
+        let width: CGFloat = expanded ? item + 8 : bubble
+        let height: CGFloat = expanded ? rows * item + 8 : bubble
+        let x: CGFloat = onRight ? size.width - width / 2 - margin : width / 2 + margin
+        let wanted = CGFloat(bubbleY) * size.height
+        let low: CGFloat = height / 2 + 8
+        let high: CGFloat = size.height - height / 2 - 8
+        let y: CGFloat = min(max(wanted, low), high)
+        return CGPoint(x: x, y: y)
     }
 
     private var collapsed: some View {
