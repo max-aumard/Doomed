@@ -40,6 +40,9 @@ targets:
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         ITSAppUsesNonExemptEncryption: false
+        NSMicrophoneUsageDescription: Doomed utilise le micro pour envoyer des messages vocaux et passer des appels sur Instagram.
+        NSCameraUsageDescription: Doomed utilise la caméra pour envoyer des photos et vidéos et passer des appels vidéo sur Instagram.
+        NSPhotoLibraryUsageDescription: Doomed accède à tes photos pour que tu puisses les envoyer dans tes messages.
     entitlements:
       path: Doomed/Doomed.entitlements
       properties:

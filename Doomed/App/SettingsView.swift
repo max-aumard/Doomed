@@ -4,6 +4,7 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject private var model: AppModel
     @EnvironmentObject private var blocker: AppBlocker
+    @Environment(\.dismiss) private var dismiss
     @State private var showPicker = false
 
     var body: some View {
@@ -25,6 +26,12 @@ struct SettingsView: View {
                     Text("YouTube")
                 } footer: {
                     Text("Un lien Short s'ouvre dans le lecteur classique.")
+                }
+
+                Section {
+                    Toggle("Bloquer les pubs", isOn: $model.settings.blockAds)
+                } footer: {
+                    Text("Pubs YouTube (vidéos et bannières), posts sponsorisés Instagram et traceurs publicitaires.")
                 }
 
                 Section {
@@ -51,8 +58,19 @@ struct SettingsView: View {
                 } footer: {
                     Text("Choisis uniquement les apps Instagram et YouTube (pas de catégories ni de sites web), sinon Doomed se bloquerait lui-même. Les notifications des apps bloquées continuent d'arriver.")
                 }
+
+                Section {
+                } footer: {
+                    Text("Touche la bulle flottante pour changer de site. Fais-la glisser pour la déplacer. Retour : balaie depuis le bord gauche. Recharger : tire la page vers le bas.")
+                }
             }
             .navigationTitle("Réglages")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("OK") { dismiss() }
+                }
+            }
             .familyActivityPicker(isPresented: $showPicker, selection: $blocker.selection)
             .onAppear { blocker.refreshAuthorization() }
         }

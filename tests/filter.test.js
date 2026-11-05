@@ -63,7 +63,54 @@ test('other sites and garbage are ignored', () => {
 test('css', () => {
   assert.match(cssFor('instagram', {}), /\/reels\//);
   assert.match(cssFor('instagram', {}), /\/explore/);
-  assert.equal(cssFor('instagram', { hideReels: false, hideExplore: false }), '');
+  assert.doesNotMatch(cssFor('instagram', { hideReels: false, hideExplore: false }), /reels|explore/);
   assert.match(cssFor('youtube', {}), /ytm-reel-shelf-renderer/);
-  assert.equal(cssFor('youtube', { hideShorts: false }), '');
+  assert.doesNotMatch(cssFor('youtube', { hideShorts: false }), /shorts/);
+  assert.equal(cssFor('youtube', { hideShorts: false, blockAds: false }), '');
+});
+
+const { pruneAds, isSponsoredLabel } = require('../Doomed/Web/filter.js');
+
+test('youtube: ad payloads are stripped from player responses', () => {
+  const player = { videoDetails: { videoId: 'x' }, adPlacements: [1], playerAds: [2], adSlots: [3] };
+  pruneAds(player);
+  assert.deepEqual(player, { videoDetails: { videoId: 'x' } });
+
+  const pbj = [{ page: 'watch' }, { playerResponse: { adPlacements: [1], streamingData: {} } }];
+  pruneAds(pbj);
+  assert.deepEqual(pbj[1].playerResponse, { streamingData: {} });
+
+  assert.equal(pruneAds(null), null);
+  assert.equal(pruneAds('text'), 'text');
+});
+
+test('instagram: sponsored labels', () => {
+  assert.ok(isSponsoredLabel('Sponsorisé'));
+  assert.ok(isSponsoredLabel(' Sponsored '));
+  assert.ok(!isSponsoredLabel('Sponsorisé par un ami qui raconte sa vie'));
+  assert.ok(!isSponsoredLabel('samiaa.b3'));
+});
+
+test('youtube: ad css only when enabled', () => {
+  assert.match(cssFor('youtube', {}), /ad-slot-renderer/);
+  assert.doesNotMatch(cssFor('youtube', { blockAds: false }), /ad-slot-renderer/);
+});
+
+test('adblock.json is a valid WebKit rule list', () => {
+  const rules = require('../Doomed/Web/adblock.json');
+  assert.ok(Array.isArray(rules) && rules.length > 0);
+  for (const rule of rules) {
+    const filter = rule.trigger['url-filter'];
+    assert.equal(rule.action.type, 'block');
+    assert.ok(!filter.includes('|'), 'WebKit url-filter does not support alternation: ' + filter);
+    new RegExp(filter);
+  }
+  const matches = (url) => rules.some((r) => new RegExp(r.trigger['url-filter'], 'i').test(url));
+  assert.ok(matches('https://googleads.g.doubleclick.net/pagead/id'));
+  assert.ok(matches('https://www.youtube.com/pagead/adview?x=1'));
+  assert.ok(matches('https://www.youtube.com/api/stats/ads?ver=2'));
+  assert.ok(!matches('https://www.youtube.com/watch?v=abc'));
+  assert.ok(!matches('https://m.youtube.com/youtubei/v1/player'));
+  assert.ok(!matches('https://www.instagram.com/direct/inbox/'));
+  assert.ok(!matches('https://scontent.cdninstagram.com/v/t51.jpg'));
 });

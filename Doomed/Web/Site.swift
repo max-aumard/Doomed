@@ -13,6 +13,13 @@ enum Site: String, CaseIterable, Identifiable {
         }
     }
 
+    var icon: String {
+        switch self {
+        case .instagram: return "bubble.left.and.bubble.right.fill"
+        case .youtube: return "play.rectangle.fill"
+        }
+    }
+
     var homeURL: URL {
         switch self {
         case .instagram: return URL(string: "https://www.instagram.com/direct/inbox/")!

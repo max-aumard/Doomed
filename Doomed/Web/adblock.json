@@ -1,0 +1,186 @@
+[
+  {
+    "trigger": {
+      "url-filter": "^[^:]+://+([^:/]+.)?doubleclick.net[:/]"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^[^:]+://+([^:/]+.)?googlesyndication.com[:/]"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^[^:]+://+([^:/]+.)?googleadservices.com[:/]"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^[^:]+://+([^:/]+.)?google-analytics.com[:/]"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^[^:]+://+([^:/]+.)?googletagmanager.com[:/]"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^[^:]+://+([^:/]+.)?googletagservices.com[:/]"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^[^:]+://+([^:/]+.)?adservice.google.com[:/]"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^[^:]+://+([^:/]+.)?imasdk.googleapis.com[:/]"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^[^:]+://+([^:/]+.)?pagead2.googlesyndication.com[:/]"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^[^:]+://+([^:/]+.)?ad.doubleclick.net[:/]"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^[^:]+://+([^:/]+.)?static.doubleclick.net[:/]"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^[^:]+://+([^:/]+.)?adsrvr.org[:/]"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^[^:]+://+([^:/]+.)?scorecardresearch.com[:/]"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^[^:]+://+([^:/]+.)?connect.facebook.net[:/]"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^[^:]+://+([^:/]+.)?an.facebook.com[:/]"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^[^:]+://+([^:/]+.)?pixel.facebook.com[:/]"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^https?://([^/]+.)?youtube.com/pagead/"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^https?://([^/]+.)?youtube.com/api/stats/ads"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^https?://([^/]+.)?youtube.com/api/stats/qoe?.*adformat"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^https?://([^/]+.)?youtube.com/ptracking"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^https?://([^/]+.)?youtube.com/get_midroll_info"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^https?://([^/]+.)?youtube.com/youtubei/v1/log_event"
+    },
+    "action": {
+      "type": "block"
+    }
+  },
+  {
+    "trigger": {
+      "url-filter": "^https?://([^/]+.)?facebook.com/tr[/?]"
+    },
+    "action": {
+      "type": "block"
+    }
+  }
+]

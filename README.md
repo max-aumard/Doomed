@@ -4,6 +4,8 @@ Application iOS **gratuite et open source** pour arrêter le doomscroll sans per
 
 - **Instagram** : messages, stories, profils et fil restent là. L'onglet Reels et Explorer disparaissent. Un reel envoyé par un ami en DM s'ouvre seul, sans pouvoir swiper vers le suivant.
 - **YouTube** : les Shorts disparaissent. Un lien Short s'ouvre dans le lecteur classique.
+- **Pubs bloquées** : pubs vidéo et bannières YouTube, posts sponsorisés Instagram, traceurs.
+- **Plein écran**, sans barre de navigateur : une petite bulle flottante sert à changer de site et à ouvrir les réglages.
 - **Blocage des apps officielles** via Screen Time, pour ne pas pouvoir retourner scroller dans l'app Instagram ou YouTube.
 
 ## Comment ça marche
@@ -57,6 +59,25 @@ Pour mettre à jour les règles quand Instagram ou YouTube change son site : mod
 
 - **Rapide, gratuit** : télécharger l'IPA non signée depuis l'onglet Actions, puis la signer et l'installer avec [Sideloadly](https://sideloadly.io) ou AltStore et un Apple ID gratuit. L'app expire au bout de 7 jours, et le blocage Screen Time peut ne pas marcher avec un compte gratuit.
 - **TestFlight / App Store** : demande un compte Apple Developer (99 €/an) et les étapes ci-dessous.
+
+## Build signé (nécessaire pour Screen Time)
+
+L'IPA non signée, une fois réinstallée avec Sideloadly, peut perdre le droit Family Controls, et le blocage des apps natives ne marche alors pas. Le job **Signed development IPA** produit une IPA signée par ton compte Apple Developer, avec ce droit.
+
+1. App Store Connect > Utilisateurs et accès > Intégrations > Clés App Store Connect API : crée une clé avec le rôle **Admin** et télécharge le fichier `AuthKey_XXXX.p8`. Note le *Key ID* et l'*Issuer ID*.
+2. Ajoute les secrets GitHub (depuis le dossier du repo) :
+
+   ```bash
+   gh secret set ASC_KEY_ID
+   gh secret set ASC_ISSUER_ID
+   gh secret set APPLE_TEAM_ID
+   base64 -w0 AuthKey_XXXX.p8 | gh secret set ASC_KEY_P8_BASE64
+   ```
+
+   `APPLE_TEAM_ID` se trouve sur developer.apple.com > Account > Membership.
+3. Optionnel : variable `BUNDLE_ID` (`gh variable set BUNDLE_ID`), par défaut `com.maxaumard.doomed`.
+4. Onglet Actions > iOS > *Run workflow*. L'artefact `Doomed-dev-ipa` est signé pour les iPhone enregistrés sur ton compte.
+5. Installe-le sans le re-signer (Sideloadly : Advanced Options > Signing mode > *Normal install*).
 
 ## Publication App Store (à faire)
 

@@ -1,14 +1,23 @@
+import SwiftUI
 import UIKit
 import WebKit
 
-/// Owns one long-lived WKWebView per site so tabs keep their state.
+struct WebView: UIViewRepresentable {
+    let webView: WKWebView
+
+    func makeUIView(context: Context) -> WKWebView { webView }
+    func updateUIView(_ uiView: WKWebView, context: Context) {}
+}
+
+/// Owns one long-lived WKWebView per site so switching sites keeps their state.
 @MainActor
 final class WebViewStore: NSObject, ObservableObject {
     let site: Site
     let webView: WKWebView
 
-    @Published private(set) var canGoBack = false
-    @Published private(set) var isLoading = false
+    private var settings: FilterSettings
+    private var adRules: WKContentRuleList?
+    private var started = false
 
     private static let filterSource: String = {
         guard
@@ -23,6 +32,7 @@ final class WebViewStore: NSObject, ObservableObject {
 
     init(site: Site, settings: FilterSettings) {
         self.site = site
+        self.settings = settings
 
         let config = WKWebViewConfiguration()
         config.websiteDataStore = .default() // keeps the login between launches
@@ -36,17 +46,31 @@ final class WebViewStore: NSObject, ObservableObject {
         webView.navigationDelegate = self
         webView.uiDelegate = self
         webView.allowsBackForwardNavigationGestures = true
+        webView.allowsLinkPreview = false
+        webView.isOpaque = false
+        webView.backgroundColor = .systemBackground
+        webView.scrollView.backgroundColor = .systemBackground
 
         let refresh = UIRefreshControl()
         refresh.addTarget(self, action: #selector(pullToRefresh(_:)), for: .valueChanged)
         webView.scrollView.refreshControl = refresh
 
-        installScripts(settings)
+        installScripts()
+    }
+
+    /// Called once the ad-block rule list is compiled (or failed to compile).
+    func start(adRules: WKContentRuleList?) {
+        self.adRules = adRules
+        installContentRules()
+        guard !started else { return }
+        started = true
         goHome()
     }
 
     func apply(_ settings: FilterSettings) {
-        installScripts(settings)
+        self.settings = settings
+        installScripts()
+        installContentRules()
         webView.reload()
     }
 
@@ -54,15 +78,7 @@ final class WebViewStore: NSObject, ObservableObject {
         webView.load(URLRequest(url: site.homeURL))
     }
 
-    func goBack() {
-        webView.goBack()
-    }
-
-    func reload() {
-        webView.reload()
-    }
-
-    private func installScripts(_ settings: FilterSettings) {
+    private func installScripts() {
         let controller = webView.configuration.userContentController
         controller.removeAllUserScripts()
         controller.addUserScript(WKUserScript(
@@ -77,9 +93,12 @@ final class WebViewStore: NSObject, ObservableObject {
         ))
     }
 
-    private func refreshState() {
-        canGoBack = webView.canGoBack
-        isLoading = webView.isLoading
+    private func installContentRules() {
+        let controller = webView.configuration.userContentController
+        controller.removeAllContentRuleLists()
+        if settings.blockAds, let adRules {
+            controller.add(adRules)
+        }
     }
 
     @objc private func pullToRefresh(_ sender: UIRefreshControl) {
@@ -118,26 +137,6 @@ extension WebViewStore: WKNavigationDelegate {
         return .cancel
     }
 
-    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-        refreshState()
-    }
-
-    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-        refreshState()
-    }
-
-    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        refreshState()
-    }
-
-    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        refreshState()
-    }
-
-    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        refreshState()
-    }
-
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
         webView.reload()
     }
@@ -155,5 +154,16 @@ extension WebViewStore: WKUIDelegate {
             webView.load(navigationAction.request)
         }
         return nil
+    }
+
+    /// Microphone / camera for voice messages and video calls. iOS still shows
+    /// its own system prompt the first time (NSMicrophoneUsageDescription).
+    func webView(
+        _ webView: WKWebView,
+        decideMediaCapturePermissionsFor origin: WKSecurityOrigin,
+        initiatedBy frame: WKFrameInfo,
+        type: WKMediaCaptureType
+    ) async -> WKPermissionDecision {
+        site.allows(host: origin.host) ? .grant : .deny
     }
 }

@@ -54,7 +54,13 @@ final class AppBlocker: ObservableObject {
             try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
             errorMessage = nil
         } catch {
-            errorMessage = "Autorisation Screen Time refusée : \(error.localizedDescription)"
+            // The most common cause: the build was re-signed by a sideloading tool
+            // that drops the com.apple.developer.family-controls entitlement.
+            errorMessage = """
+            Screen Time indisponible (\(error.localizedDescription)). \
+            Si l'app a été installée avec Sideloadly, installe la version signée \
+            « Doomed-dev » (voir README).
+            """
         }
         refreshAuthorization()
     }

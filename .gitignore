@@ -13,3 +13,4 @@ Payload/
 xcuserdata/
 .DS_Store
 node_modules/
+dist/
