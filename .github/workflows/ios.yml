@@ -81,7 +81,7 @@ jobs:
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
       ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
       APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-      BUNDLE_ID: ${{ vars.BUNDLE_ID || 'com.maxaumard.doomed' }}
+      BUNDLE_ID: ${{ vars.BUNDLE_ID || 'org.doomed.app' }}
     steps:
       - uses: actions/checkout@v5
 

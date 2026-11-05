@@ -75,7 +75,7 @@ L'IPA non signée, une fois réinstallée avec Sideloadly, peut perdre le droit 
    ```
 
    `APPLE_TEAM_ID` se trouve sur developer.apple.com > Account > Membership.
-3. Optionnel : variable `BUNDLE_ID` (`gh variable set BUNDLE_ID`), par défaut `com.maxaumard.doomed`.
+3. Optionnel : variable `BUNDLE_ID` (`gh variable set BUNDLE_ID`), par défaut `org.doomed.app` (déjà enregistré sur ton compte par Sideloadly).
 4. Onglet Actions > iOS > *Run workflow*. L'artefact `Doomed-dev-ipa` est signé pour les iPhone enregistrés sur ton compte.
 5. Installe-le sans le re-signer (Sideloadly : Advanced Options > Signing mode > *Normal install*).
 
